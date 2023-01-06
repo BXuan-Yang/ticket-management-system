@@ -13,6 +13,6 @@ public class ExceptionController {
 
     @ExceptionHandler(GlobalException.class)
     public Result globalExceptionController(GlobalException e){
-        return Result.fail(e.getMessage());
+        return Result.fail(e.getStatus(),e.getMessage());
     }
 }

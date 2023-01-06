@@ -28,13 +28,27 @@ public class Result<T> {
     }
 
     public static <T extends Serializable> Result<T> fail(String message) {
-        return fail(null, message);
+        return fail( message,null);
     }
 
-    public static <T> Result<T> fail(T data, String message) {
+    public static <T> Result<T> fail(String message,T data) {
         return Result.<T>builder().data(data)
                 .message(message)
                 .status(HttpConstant.HTTP_FAIL)
+                .build();
+    }
+
+    public static <T> Result<T> fail(Integer status, String message) {
+        return Result.<T>builder()
+                .message(message)
+                .status(status)
+                .build();
+    }
+
+    public static <T> Result<T> fail(Integer status,String message,T data){
+        return Result.<T>builder().data(data)
+                .message(message)
+                .status(status)
                 .build();
     }
 }

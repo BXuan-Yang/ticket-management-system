@@ -13,4 +13,6 @@ public interface HttpConstant {
     Integer HTTP_NO_LOGIN = 40100;
 
     Integer HTTP_NO_PERMISSION = 40101;
+
+    Integer HTTP_ERROR = 50000;
 }
