@@ -5,13 +5,14 @@ spring:
 #    nacos:
 #      server-addr: localhost:8848
   datasource:
-    url: jdbc:mysql://localhost:3306/ticketManagement?useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://8.134.208.193:3306/ticketManagement?useSSL=false&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: aA15815249122
+    password: oNQw543_54lxq8b5YeEYOkWLTALIYUN
   redis:
     host: localhost
     port: 6379
+    password: oNQw543_54lxq8b5YeEYOkWLTREDIS
   servlet:
     multipart:
       max-file-size: 10MB

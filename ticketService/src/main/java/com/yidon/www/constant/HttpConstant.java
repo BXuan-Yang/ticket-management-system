@@ -6,7 +6,11 @@ package com.yidon.www.constant;
  */
 public interface HttpConstant {
 
-    Integer HTTP_OK = 200;
+    Integer HTTP_OK = 20000;
 
-    Integer HTTP_FAIL = 400;
+    Integer HTTP_FAIL = 40000;
+
+    Integer HTTP_NO_LOGIN = 40100;
+
+    Integer HTTP_NO_PERMISSION = 40101;
 }
