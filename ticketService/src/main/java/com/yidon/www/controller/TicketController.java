@@ -1,6 +1,7 @@
 package com.yidon.www.controller;
 
 import com.yidon.www.common.Result;
+import com.yidon.www.constant.HttpConstant;
 import com.yidon.www.pojo.Ticket;
 import com.yidon.www.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,51 +27,48 @@ public class TicketController {
             return Result.success();
         } catch (Exception e) {
             e.printStackTrace();
-            return Result.fail("新增失败");
+            return Result.fail(HttpConstant.HTTP_FAIL, "新增失败");
         }
     }
 
     @DeleteMapping("/deleteById/{id}")
-    public Result deleteById(@PathVariable(value = "id") Integer id) {
-        try {
+    public Result deleteById(@PathVariable(value = "id") Integer id) throws RuntimeException{
+        Ticket ticket = ticketService.selectById(id);
+        if (ticket != null) {
             ticketService.deleteById(id);
-            return Result.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.fail("删除失败");
+            return Result.success(ticket);
+        } else {
+            return Result.fail(HttpConstant.HTTP_FAIL, "删除失败,该用户不存在");
         }
     }
 
     @PutMapping("/updateById/{id}")
-    public Result updateById(@RequestBody Ticket ticket) {
-        try {
-            ticketService.updateById(ticket);
-            return Result.success();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.fail("更新失败");
+    public Result updateById(@RequestBody Ticket ticket) throws RuntimeException{
+        boolean res = ticketService.updateById(ticket);
+        if (res != false) {
+            return Result.success(ticket);
+        } else {
+            return Result.fail(HttpConstant.HTTP_FAIL, "更新失败，该用户不存在");
         }
     }
 
     @GetMapping("/selectById/{id}")
-    public Result selectById(@PathVariable(value = "id") Integer id) {
-        try {
-            Ticket ticket = ticketService.selectById(id);
+    public Result selectById(@PathVariable(value = "id") Integer id) throws RuntimeException {
+        Ticket ticket = ticketService.selectById(id);
+        if (ticket != null) {
             return Result.success(ticket);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.fail("查询用户数据失败");
+        } else {
+            return Result.fail(HttpConstant.HTTP_FAIL, "查询失败，该用户不存在");
         }
     }
 
     @GetMapping("/selectAll")
-    public Result selectAll() {
-        try {
-            List<Ticket> list = ticketService.selectAll();
+    public Result selectAll() throws RuntimeException {
+        List<Ticket> list = ticketService.selectAll();
+        if (list != null) {
             return Result.success(list);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Result.fail("查询失败");
+        } else {
+            return Result.fail(HttpConstant.HTTP_FAIL, "查询失败，系统无数据");
         }
     }
 }
