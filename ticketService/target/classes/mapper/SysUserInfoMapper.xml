@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yidon.www.mapper.SysUserInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.yidon.www.pojo.SysUserInfo">
+            <id property="user_id" column="user_id" jdbcType="INTEGER"/>
+            <result property="login_name" column="login_name" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
+            <result property="user_name" column="user_name" jdbcType="VARCHAR"/>
+            <result property="create_time" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="update_time" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="user_identity" column="user_identity" jdbcType="TINYINT"/>
+            <result property="is_deleted" column="is_deleted" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id,login_name,password,
+        user_name,create_time,update_time,
+        user_identity,is_deleted
+    </sql>
+</mapper>

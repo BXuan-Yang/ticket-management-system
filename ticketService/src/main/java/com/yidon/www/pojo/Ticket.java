@@ -15,7 +15,6 @@ public class Ticket {
     @TableId(type = IdType.AUTO)
     private Integer id;
 
-
     //TODO: 添加其他字段
 
     @TableField(fill = FieldFill.INSERT)
