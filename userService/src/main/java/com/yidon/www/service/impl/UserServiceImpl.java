@@ -119,7 +119,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public Result getUserById(Long uid) {
         User user = userMapper.selectById(uid);
-        if (user == null) {
+        if (user != null) {
             return Result.success(user);
         } else {
             return Result.fail("用户不存在");
