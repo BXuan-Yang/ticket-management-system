@@ -49,5 +49,10 @@ public class UserController {
         return userService.getUserById(uid);
     }
 
+    @PostMapping("/editor")
+    public Result editor(@RequestBody UserDto userDto){
+        return userService.editor(userDto);
+    }
+
 
 }

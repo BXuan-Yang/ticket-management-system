@@ -20,4 +20,6 @@ public interface UserService  extends IService<User> {
     Result register(UserDto userDto);
 
     Result getUserById(Long uid);
+
+    Result editor(UserDto userDto);
 }
