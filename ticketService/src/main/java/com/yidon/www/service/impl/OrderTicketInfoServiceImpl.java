@@ -1,5 +1,7 @@
 package com.yidon.www.service.impl;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
@@ -16,13 +18,16 @@ import com.yidon.www.mapper.OrderTicketInfoMapper;
 import com.yidon.www.service.ProductTrainInfoService;
 import com.yidon.www.service.SysUserInfoService;
 import com.yidon.www.utils.JWTUtils;
+import com.yidon.www.utils.RedisData;
 import com.yidon.www.vo.OrderTicketInfoSearchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import cn.hutool.json.JSONUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +46,7 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
     @Autowired
     private ProductTrainInfoService productTrainInfoService;
 
-    private static String LOCK_KEY = "ticket_lock";
-    private static String USER_KEY = "user_key";
+    private static String LOCK_KEY = "ticket_lock:";
     private static Long unLoginFail = 0L;
 
     /**
@@ -56,8 +60,6 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
         if (userId == unLoginFail){
             return Result.fail(HttpConstant.HTTP_NO_LOGIN, "用户未登录！");
         }
-//        // 首先查询Redis中是否含有车票信息
-//        Object o = redisTemplate.opsForValue().get(USER_KEY + userId);
 
         // 查询当前登录用户的车票 用户id + 未过期
         QueryWrapper<OrderTicketInfo> queryWrapper = new QueryWrapper<>();
@@ -65,9 +67,6 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
         queryWrapper.eq("is_deleted", 0);
         // 查询数据库
         List<OrderTicketInfo> list = this.list(queryWrapper);
-
-        // 将查询到的车票信息存入Redis
-        redisTemplate.opsForValue().set(USER_KEY + userId, list.toString());
 
         return Result.success(list);
     }
@@ -194,7 +193,7 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
         if (map == null){
             return unLoginFail;
         }
-        String userJson = redisTemplate.opsForValue().get("TOKEN_" + token);
+        String userJson = (String) redisTemplate.opsForValue().get("TOKEN_" + token);
         if (StringUtils.isBlank(userJson)){
             return unLoginFail;
         }
