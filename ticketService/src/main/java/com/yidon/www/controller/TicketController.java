@@ -157,7 +157,7 @@ public class TicketController {
         // 对车票进行逻辑删除操作
         result &= orderTicketInfoService.removeById(orderTicketInfo);
         if (!result) {
-            return Result.fail(HttpConstant.HTTP_FAIL, "数据库操作失败，请联系管理员");
+            return Result.fail(HttpConstant.HTTP_ERROR, "数据库操作失败，请联系管理员");
         }
         return Result.success("退票成功");
     }
