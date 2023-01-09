@@ -20,11 +20,6 @@ public class OrderTicketInfoAddVO implements Serializable {
     private Integer train_id;
 
     /**
-     * 用户id
-     */
-    private Integer user_id;
-
-    /**
      * 序列化id
      */
     @TableField(exist = false)
