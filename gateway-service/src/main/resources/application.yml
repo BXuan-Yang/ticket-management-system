@@ -1,0 +1,33 @@
+server:
+  port: 8500
+spring:
+  application:
+    name: gateway-service
+  redis:
+    host: localhost
+    port: 6379
+    password: oNQw543_54lxq8b5YeEYOkWLTREDIS
+  datasource:
+    url: jdbc:mysql://8.134.208.193:3306/ticketManagement?useSSL=false&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: oNQw543_54lxq8b5YeEYOkWLTALIYUN
+  cloud:
+    gateway:
+      routes:
+        - id: ticketService
+          uri: http://localhost:7001
+          predicates:
+            - Path=/ticket/**
+        - id: userService
+          uri: http://localhost:7003
+          predicates:
+            - Path=/user/**
+        - id: trainNoService
+          uri: http://localhost:7002
+          predicates:
+            - Path=/trainNo/**
+#    nacos:
+#      discovery:
+#        # 配置Nacos注册中心地址
+#        server-addr: localhost:8848

@@ -12,6 +12,7 @@
         <module>userService</module>
         <module>ticketService</module>
         <module>trainNoService</module>
+        <module>gateway-service</module>
     </modules>
     <!--  父工程版本锁定-->
     <properties>
