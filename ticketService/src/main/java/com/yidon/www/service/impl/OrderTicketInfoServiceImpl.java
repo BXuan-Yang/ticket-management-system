@@ -1,34 +1,31 @@
 package com.yidon.www.service.impl;
 
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONObject;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import com.yidon.www.common.Result;
 import com.yidon.www.constant.HttpConstant;
+import com.yidon.www.mapper.OrderTicketInfoMapper;
 import com.yidon.www.pojo.OrderTicketInfo;
 import com.yidon.www.pojo.ProductTrainInfo;
 import com.yidon.www.pojo.SysUserInfo;
 import com.yidon.www.pojo.User;
 import com.yidon.www.service.OrderTicketInfoService;
-import com.yidon.www.mapper.OrderTicketInfoMapper;
 import com.yidon.www.service.ProductTrainInfoService;
 import com.yidon.www.service.SysUserInfoService;
 import com.yidon.www.utils.JWTUtils;
-import com.yidon.www.utils.RedisData;
-import com.yidon.www.vo.OrderTicketInfoSearchVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
-import cn.hutool.json.JSONUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,8 +43,12 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
     @Autowired
     private ProductTrainInfoService productTrainInfoService;
 
-    private static String LOCK_KEY = "ticket_lock:";
-    private static Long unLoginFail = 0L;
+    @Autowired
+    private RedisTemplate<String, Object> objectRedisTemplate;
+
+    private static final String LOCK_KEY = "ticket_lock:";
+    private static final String SEARCH_KEY = "search_key:";
+    private static final Long unLoginFail = 0L;
 
     /**
      * 查询车票
@@ -60,14 +61,27 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
         if (userId == unLoginFail){
             return Result.fail(HttpConstant.HTTP_NO_LOGIN, "用户未登录！");
         }
-
+        String redisKey = String.format(SEARCH_KEY + userId);
+        ValueOperations<String, Object> valueOperations = objectRedisTemplate.opsForValue();
+        List<OrderTicketInfo> list = (List<OrderTicketInfo>) valueOperations.get(redisKey);
+        if (list != null) {
+            return Result.success(list);
+        }
         // 查询当前登录用户的车票 用户id + 未过期
         QueryWrapper<OrderTicketInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
         queryWrapper.eq("is_deleted", 0);
         // 查询数据库
-        List<OrderTicketInfo> list = this.list(queryWrapper);
-
+        list = this.list(queryWrapper);
+        try {
+            long timeout = 1;
+            if (list.size() > 0) {
+                timeout = 10;
+            }
+            valueOperations.set(redisKey, list, timeout, TimeUnit.MINUTES);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return Result.success(list);
     }
 
@@ -176,6 +190,7 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
         boolean result = productTrainInfoService.updateById(productTrainInfo);
         // 对车票进行逻辑删除操作
         result &= this.removeById(orderTicketInfo);
+        objectRedisTemplate.delete(String.format(SEARCH_KEY + userId));
         if (!result) {
             return Result.fail(HttpConstant.HTTP_FAIL, "数据库操作失败，请联系管理员");
         }
