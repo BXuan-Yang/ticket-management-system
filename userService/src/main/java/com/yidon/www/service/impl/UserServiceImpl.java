@@ -2,6 +2,7 @@ package com.yidon.www.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yidon.www.common.Result;
@@ -124,6 +125,44 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else {
             return Result.fail("用户不存在");
         }
+    }
+
+    @Override
+    public Result editor(UserDto userDto) {
+        LambdaUpdateWrapper<User> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        User updateUser = new User();
+        updateUser.setUserId(userDto.getUserId());
+        User user = userMapper.selectById(userDto.getUserId());
+        //输入登录名把不为空
+        if(StringUtils.isNotBlank(userDto.getLoginName())){
+            // 获取登录名
+            String loginName = userDto.getLoginName();
+            // 登录名和原来的登录名不一致
+            if(!loginName.equals(user.getLoginName())){
+                LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(User::getLoginName, loginName);
+                User user1 = userMapper.selectOne(lambdaQueryWrapper);
+                if(user1 != null){
+                    return Result.fail(HttpConstant.HTTP_HAS_LOGINNAME, "登录名已存在");
+                }
+                lambdaUpdateWrapper.eq(User::getLoginName, user.getLoginName());
+                updateUser.setLoginName(loginName);
+            }
+
+        }
+        // 输入username不为空
+        if(StringUtils.isNotBlank(userDto.getUserName())){
+            lambdaUpdateWrapper.eq(User::getUserName, user.getUserName());
+            updateUser.setUserName(userDto.getUserName());
+        }
+        // 输入密码不为空
+        if(StringUtils.isNotBlank(userDto.getPassword())){
+            lambdaUpdateWrapper.eq(User::getPassword, user.getPassword());
+            updateUser.setPassword(DigestUtils.md5Hex(userDto.getPassword()+slat));
+        }
+        userMapper.update(updateUser, lambdaUpdateWrapper);
+
+        return Result.success("更新成功");
     }
 
 }
