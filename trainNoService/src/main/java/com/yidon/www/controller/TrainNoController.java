@@ -32,18 +32,18 @@ public class TrainNoController {
     }
 
     @DeleteMapping("/deleteById/{id}")
-    public Result deleteById(@PathVariable(value = "id") Integer id) throws RuntimeException{
+    public Result deleteById(@PathVariable(value = "id") Integer id){
         TrainNo trainNo = trainNoService.selectById(id);
         if (trainNo != null) {
             trainNoService.deleteById(id);
-            return Result.success(trainNo);
+            return Result.success();
         } else {
             return Result.fail(HttpConstant.HTTP_FAIL, "删除失败");
         }
     }
 
     @PutMapping("/updateById/{id}")
-    public Result updateById(@RequestBody TrainNo trainNo) throws RuntimeException{
+    public Result updateById(@RequestBody TrainNo trainNo){
         boolean res = trainNoService.updateById(trainNo);
         if (res) {
             return Result.success(trainNo);
@@ -53,7 +53,7 @@ public class TrainNoController {
     }
 
     @GetMapping("/selectById/{id}")
-    public Result selectById(@PathVariable(value = "id") Integer id) throws RuntimeException {
+    public Result selectById(@PathVariable(value = "id") Integer id){
         TrainNo trainNo = trainNoService.selectById(id);
         if (trainNo != null) {
             return Result.success(trainNo);
@@ -63,7 +63,7 @@ public class TrainNoController {
     }
 
     @GetMapping("/selectAll")
-    public Result selectAll() throws RuntimeException {
+    public Result selectAll(){
         List<TrainNo> list = trainNoService.selectAll();
         if (list != null) {
             return Result.success(list);
