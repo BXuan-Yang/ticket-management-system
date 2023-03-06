@@ -36,15 +36,12 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
     implements OrderTicketInfoService{
 
     @Autowired
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
     private SysUserInfoService sysUserInfoService;
     @Autowired
     private ProductTrainInfoService productTrainInfoService;
-
-    @Autowired
-    private RedisTemplate<String, Object> objectRedisTemplate;
 
     private static final String LOCK_KEY = "ticket_lock:";
     private static final String SEARCH_KEY = "search_key:";
@@ -62,17 +59,17 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
             return Result.fail(HttpConstant.HTTP_NO_LOGIN, "用户未登录！");
         }
         String redisKey = String.format(SEARCH_KEY + userId);
-        ValueOperations<String, Object> valueOperations = objectRedisTemplate.opsForValue();
-        List<OrderTicketInfo> list = (List<OrderTicketInfo>) valueOperations.get(redisKey);
-        if (list != null) {
-            return Result.success(list);
-        }
+        ValueOperations<String, Object> valueOperations = redisTemplate.opsForValue();
+//        List<OrderTicketInfo> list = (List<OrderTicketInfo>) valueOperations.get(redisKey);
+//        if (list != null) {
+//            return Result.success(list);
+//        }
         // 查询当前登录用户的车票 用户id + 未过期
         QueryWrapper<OrderTicketInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId);
         queryWrapper.eq("is_deleted", 0);
         // 查询数据库
-        list = this.list(queryWrapper);
+        List<OrderTicketInfo> list = this.list(queryWrapper);
         try {
             long timeout = 1;
             if (list.size() > 0) {
@@ -190,7 +187,7 @@ public class OrderTicketInfoServiceImpl extends ServiceImpl<OrderTicketInfoMappe
         boolean result = productTrainInfoService.updateById(productTrainInfo);
         // 对车票进行逻辑删除操作
         result &= this.removeById(orderTicketInfo);
-        objectRedisTemplate.delete(String.format(SEARCH_KEY + userId));
+        redisTemplate.delete(String.format(SEARCH_KEY + userId));
         if (!result) {
             return Result.fail(HttpConstant.HTTP_FAIL, "数据库操作失败，请联系管理员");
         }
